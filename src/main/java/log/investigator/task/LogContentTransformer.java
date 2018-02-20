@@ -24,7 +24,7 @@ public class LogContentTransformer {
         this.fileContent = fileContent;
     }
 
-    HashMap<String, HashMap<String, String>> generateLogOutput() throws IOException {
+    public HashMap<String, HashMap<String, String>> generateLogOutput() throws IOException {
         getLogDataFromFile();
         setOutputForLogData();
 

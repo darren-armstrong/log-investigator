@@ -16,6 +16,7 @@ import log.investigator.validator.SessionRequestValidator;
 import log.investigator.validator.SftpSessionValidator;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -75,7 +76,8 @@ public class ServerServiceImp implements ServerService {
     @Override
     public HashMap<String, HashMap<String, String>> getAllFromLogFile(String username, String password, String hostname,
                                                                       int port, String directory, String file)
-            throws ServerServiceException, JSchException, SftpException {
+            throws ServerServiceException, JSchException, SftpException, IOException {
+        HashMap<String, HashMap<String, String>> dataFromLogFile = new HashMap<>();
         this.username = username;
         this.password = password;
         this.hostname = hostname;
@@ -89,11 +91,11 @@ public class ServerServiceImp implements ServerService {
         ChannelSftp channelSftp = sftpSession.getChannel();
         goToDirectory(channelSftp);
         LogContentTransformer logContentTransformer = new LogContentTransformer(channelSftp.get(file));
-
+        dataFromLogFile = logContentTransformer.generateLogOutput();
 
 
         endSftpClientConnection();
-        return null;
+        return dataFromLogFile;
     }
 
     private void setUpSftpClient() throws ServerServiceException, JSchException {
