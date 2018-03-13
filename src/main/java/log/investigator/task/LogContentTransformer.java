@@ -142,6 +142,13 @@ public class LogContentTransformer {
             line = line.substring(1).trim();
         }
 
+        return replaceAnyDoubleQuotesInString(line);
+    }
+
+    public String replaceAnyDoubleQuotesInString(String line){
+        line = line.replace("\"", "\\\"");
+        line = line.replace("\\\\\"", "\\\"");
+
         return line;
     }
 

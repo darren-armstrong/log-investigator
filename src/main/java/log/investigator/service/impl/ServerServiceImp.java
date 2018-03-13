@@ -77,7 +77,7 @@ public class ServerServiceImp implements ServerService {
     public HashMap<String, HashMap<String, String>> getAllFromLogFile(String username, String password, String hostname,
                                                                       int port, String directory, String file)
             throws ServerServiceException, JSchException, SftpException, IOException {
-        HashMap<String, HashMap<String, String>> dataFromLogFile = new HashMap<>();
+        HashMap<String, HashMap<String, String>> dataFromLogFile;
         this.username = username;
         this.password = password;
         this.hostname = hostname;
