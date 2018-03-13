@@ -9,6 +9,7 @@ import org.apache.log4j.Logger;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -44,7 +45,7 @@ public class ServerServiceTests {
     }
 
     @Test(expected = ServerServiceException.class)
-    public void getAllFromLogFile() throws ServerServiceException, JSchException, SftpException {
+    public void getAllFromLogFile() throws ServerServiceException, JSchException, SftpException, IOException {
         ServerService serverService = new ServerServiceImp();
         serverService.getAllFromLogFile(null,null, null, -1, null, null );
     }

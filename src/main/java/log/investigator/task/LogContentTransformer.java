@@ -24,7 +24,7 @@ public class LogContentTransformer {
         this.fileContent = fileContent;
     }
 
-    HashMap<String, HashMap<String, String>> generateLogOutput() throws IOException {
+    public HashMap<String, HashMap<String, String>> generateLogOutput() throws IOException {
         getLogDataFromFile();
         setOutputForLogData();
 
@@ -141,6 +141,13 @@ public class LogContentTransformer {
         if(line.startsWith("]")){
             line = line.substring(1).trim();
         }
+
+        return replaceAnyDoubleQuotesInString(line);
+    }
+
+    public String replaceAnyDoubleQuotesInString(String line){
+        line = line.replace("\"", "\\\"");
+        line = line.replace("\\\\\"", "\\\"");
 
         return line;
     }

@@ -45,6 +45,38 @@ public class LogContentTransformerTests {
     }
 
     @Test
+    public void testCountIsTheSameAsHashMapSize() throws IOException {
+        HashMap<String, HashMap<String, String>> logData;
+        String path = classLoader.getResource("log_test_file.log").getFile();
+        File initialFile = new File(path);
+        int [] count = {0, 0};
+        int [] sizes = {0, 0};
+        InputStream targetStream = new FileInputStream(initialFile);
+
+        LogContentTransformer logContentTransformer = new LogContentTransformer(targetStream);
+        LogContentTransformer logContentTransformerSpy = spy(logContentTransformer);
+
+        doReturn(
+                new SimpleDateFormat("dd/MM/yyyy HH:mm:ss"
+                ).format(new java.util.Date())).when(logContentTransformerSpy).getDateFromLine(anyString());
+
+        logData = logContentTransformerSpy.generateLogOutput();
+        sizes[0] = logData.size();
+        sizes[1] = logData.get("line 1").size();
+        logData.forEach((key, tab) ->{
+            count[1] = 0;
+            tab.forEach((nestedKey, nestedTab) ->{
+                count[1]++;
+            });
+            count[0]++;
+        });
+
+        assertEquals(count[0], sizes[0]);
+        assertEquals(count[1], sizes[1]);
+
+    }
+
+    @Test
     public void testTransformDataValidLogTwo() throws IOException {
         HashMap<String, HashMap<String, String>> logData;
         String path = classLoader.getResource("log_test_file_two").getFile();

@@ -4,6 +4,7 @@ import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import log.investigator.exception.ServerServiceException;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
@@ -15,5 +16,5 @@ public interface ServerService {
                                               int port, String directory, String file) throws ServerServiceException, JSchException, SftpException;
 
     HashMap<String, HashMap<String, String>> getAllFromLogFile(String username, String password, String hostname,
-                                                               int port, String directory, String file) throws ServerServiceException, JSchException, SftpException;
+                                                               int port, String directory, String file) throws ServerServiceException, JSchException, SftpException, IOException;
 }

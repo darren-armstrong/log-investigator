@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
@@ -64,32 +66,84 @@ public class ServerController {
             @RequestParam(defaultValue = "hw-bp-app-1.highwire.org", required = false) String hostname,
             @RequestParam(defaultValue = "22", required = false) int port,
             @RequestParam(defaultValue = "/var/log/bp/", required = false) String directory,
-            @RequestParam(defaultValue = "*.log", required = false) String file
+            @RequestParam(defaultValue = "*.log", required = false) String fileType
     ){
-        List<String> ListOfFiles = new ArrayList<>();
+        List<String> ListOfFiles;
         StringBuilder response = new StringBuilder("{");
-        String errorMessage = "";
+        String errorMessage;
 
         try {
-            ListOfFiles = serverService.getAvailableFilesInDirectory(username, password, hostname, port, directory, file);
+            ListOfFiles = serverService.getAvailableFilesInDirectory(username, password, hostname, port, directory, fileType);
+
+            for(int count = 0; (ListOfFiles.size() - 1) > count; count++){
+                String filename = ListOfFiles.get(count);
+                response.append("\"File").append(count + 1).append("\" : \"").append(filename).append("\"");
+                if(count != (ListOfFiles.size() - 2)){
+                    response.append(", ");
+                }
+            }
+
         } catch (ServerServiceException | JSchException | SftpException e) {
             errorMessage = e.getMessage();
-        }
 
-        for(int count = 0; (ListOfFiles.size() - 1) > count; count++){
-            String filename = ListOfFiles.get(count);
-            response.append("\"File").append(count + 1).append("\" : \"").append(filename).append("\"");
-            if(count != (ListOfFiles.size() - 2)){
-                response.append(", ");
+            if(!errorMessage.isEmpty()){
+                response.append("\"error message\" : \"").append(errorMessage).append("\"");
+                LOGGER.error(errorMessage);
             }
-        }
-
-        if(!errorMessage.isEmpty()){
-            response.append("\"error message\" : \"").append(errorMessage).append("\"");
-            LOGGER.error(errorMessage);
         }
         
         response.append("}");
+        return response.toString();
+    }
+
+    @ApiOperation(value = "Get all the data from a log file", notes="This returns all the log data from the requested log file")
+    @RequestMapping(value = "/displayLogDetails", method = RequestMethod.GET,
+        produces = {MediaType.APPLICATION_JSON_VALUE, MediaType.TEXT_PLAIN_VALUE})
+    @ResponseBody
+    public String displayRequestedLogData(
+            @RequestParam String username,
+            @RequestParam String password,
+            @RequestParam(defaultValue = "hw-bp-app-1.highwire.org", required = false) String hostname,
+            @RequestParam(defaultValue = "22", required = false) int port,
+            @RequestParam(defaultValue = "/var/log/bp/", required = false) String directory,
+            @RequestParam(defaultValue = "", required = false) String fileType
+    ) {
+        HashMap<String, HashMap<String, String>> dataFromLogFile;
+        StringBuilder response = new StringBuilder("{");
+        String errorMessage;
+
+        try {
+            dataFromLogFile = serverService.getAllFromLogFile(username, password, hostname, port, directory, fileType);
+            final int[] count = {0, 0};
+
+            dataFromLogFile.forEach((String key, HashMap<String, String> tab) -> {
+                response.append("\"").append(key).append("\" : {");
+                count[1] = 0;
+                tab.forEach((nestedKey, nestedTab) -> {
+                    response.append("\"").append(nestedKey).append("\" : \"").append(nestedTab).append("\"");
+                    count[1]++;
+                    if(count[1] != tab.size()){
+                        response.append(",");
+                    }
+                });
+                response.append("}");
+                count[0]++;
+                if(count[0] != dataFromLogFile.size()){
+                    response.append(",");
+                }
+            });
+
+        } catch (IOException | JSchException | ServerServiceException | SftpException e) {
+            errorMessage = e.getMessage();
+
+            if(!errorMessage.isEmpty()){
+                response.append("\"error message\" : \"").append(errorMessage).append("\"");
+                LOGGER.error(errorMessage);
+            }
+        }
+
+        response.append("}");
+
         return response.toString();
     }
 
