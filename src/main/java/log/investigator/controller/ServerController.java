@@ -1,6 +1,7 @@
 package log.investigator.controller;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.SftpException;
 import io.swagger.annotations.ApiOperation;
@@ -14,9 +15,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 
 @RestController
 @RequestMapping("/server")
@@ -68,32 +66,16 @@ public class ServerController {
             @RequestParam(defaultValue = "/var/log/bp/", required = false) String directory,
             @RequestParam(defaultValue = "*.log", required = false) String fileType
     ){
-        List<String> ListOfFiles;
-        StringBuilder response = new StringBuilder("{");
-        String errorMessage;
+        String jsonData;
 
         try {
-            ListOfFiles = serverService.getAvailableFilesInDirectory(username, password, hostname, port, directory, fileType);
-
-            for(int count = 0; (ListOfFiles.size() - 1) > count; count++){
-                String filename = ListOfFiles.get(count);
-                response.append("\"File").append(count + 1).append("\" : \"").append(filename).append("\"");
-                if(count != (ListOfFiles.size() - 2)){
-                    response.append(", ");
-                }
-            }
-
-        } catch (ServerServiceException | JSchException | SftpException e) {
-            errorMessage = e.getMessage();
-
-            if(!errorMessage.isEmpty()){
-                response.append("\"error message\" : \"").append(errorMessage).append("\"");
-                LOGGER.error(errorMessage);
-            }
+            jsonData = serverService.getAvailableFilesInDirectory(username, password, hostname, port, directory, fileType);
+        } catch (ServerServiceException | JSchException | SftpException | JsonProcessingException e) {
+            jsonData = "{\"error message\" : \"" + e.getMessage() + "\"}";
+            LOGGER.error(e.getMessage());
         }
-        
-        response.append("}");
-        return response.toString();
+
+        return jsonData;
     }
 
     @ApiOperation(value = "Get all the data from a log file", notes="This returns all the log data from the requested log file")
@@ -106,45 +88,19 @@ public class ServerController {
             @RequestParam(defaultValue = "hw-bp-app-1.highwire.org", required = false) String hostname,
             @RequestParam(defaultValue = "22", required = false) int port,
             @RequestParam(defaultValue = "/var/log/bp/", required = false) String directory,
-            @RequestParam(defaultValue = "", required = false) String fileType
+            @RequestParam(defaultValue = "", required = false) String fileName
     ) {
-        HashMap<String, HashMap<String, String>> dataFromLogFile;
-        StringBuilder response = new StringBuilder("{");
-        String errorMessage;
+        String jsonData;
 
         try {
-            dataFromLogFile = serverService.getAllFromLogFile(username, password, hostname, port, directory, fileType);
-            final int[] count = {0, 0};
-
-            dataFromLogFile.forEach((String key, HashMap<String, String> tab) -> {
-                response.append("\"").append(key).append("\" : {");
-                count[1] = 0;
-                tab.forEach((nestedKey, nestedTab) -> {
-                    response.append("\"").append(nestedKey).append("\" : \"").append(nestedTab).append("\"");
-                    count[1]++;
-                    if(count[1] != tab.size()){
-                        response.append(",");
-                    }
-                });
-                response.append("}");
-                count[0]++;
-                if(count[0] != dataFromLogFile.size()){
-                    response.append(",");
-                }
-            });
-
+            jsonData = serverService.getAllFromLogFile(username, password, hostname, port, directory, fileName);
         } catch (IOException | JSchException | ServerServiceException | SftpException e) {
-            errorMessage = e.getMessage();
 
-            if(!errorMessage.isEmpty()){
-                response.append("\"error message\" : \"").append(errorMessage).append("\"");
-                LOGGER.error(errorMessage);
-            }
+            jsonData = ("{\"error message\" : \"" + e.getMessage() + "\"}");
+            LOGGER.error(e.getMessage());
         }
 
-        response.append("}");
-
-        return response.toString();
+        return jsonData;
     }
 
 

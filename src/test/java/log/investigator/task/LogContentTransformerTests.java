@@ -8,6 +8,7 @@ import org.junit.Test;
 import java.io.*;
 import java.text.SimpleDateFormat;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -27,7 +28,7 @@ public class LogContentTransformerTests {
     // Test transform log file
     @Test
     public void testTransformDataValidLogOne() throws IOException {
-        HashMap<String, HashMap<String, String>> logData;
+        LinkedHashMap<Integer, LinkedHashMap<String, String>> logData;
         String path = classLoader.getResource("log_test_file.log").getFile();
         File initialFile = new File(path);
         InputStream targetStream = new FileInputStream(initialFile);
@@ -46,7 +47,7 @@ public class LogContentTransformerTests {
 
     @Test
     public void testCountIsTheSameAsHashMapSize() throws IOException {
-        HashMap<String, HashMap<String, String>> logData;
+        LinkedHashMap<Integer, LinkedHashMap<String, String>> logData;
         String path = classLoader.getResource("log_test_file.log").getFile();
         File initialFile = new File(path);
         int [] count = {0, 0};
@@ -62,7 +63,7 @@ public class LogContentTransformerTests {
 
         logData = logContentTransformerSpy.generateLogOutput();
         sizes[0] = logData.size();
-        sizes[1] = logData.get("line 1").size();
+        sizes[1] = logData.get(1).size();
         logData.forEach((key, tab) ->{
             count[1] = 0;
             tab.forEach((nestedKey, nestedTab) ->{
@@ -78,7 +79,7 @@ public class LogContentTransformerTests {
 
     @Test
     public void testTransformDataValidLogTwo() throws IOException {
-        HashMap<String, HashMap<String, String>> logData;
+        LinkedHashMap<Integer, LinkedHashMap<String, String>> logData;
         String path = classLoader.getResource("log_test_file_two").getFile();
         File initialFile = new File(path);
         InputStream targetStream = new FileInputStream(initialFile);
@@ -97,7 +98,7 @@ public class LogContentTransformerTests {
 
     @Test
     public void testTransformDataValidLogThree() throws IOException {
-        HashMap<String, HashMap<String, String>> logData;
+        LinkedHashMap<Integer, LinkedHashMap<String, String>> logData;
         String path = classLoader.getResource("log_test_file_three.log").getFile();
         File initialFile = new File(path);
         InputStream targetStream = new FileInputStream(initialFile);
@@ -114,7 +115,7 @@ public class LogContentTransformerTests {
 
     @Test
     public void testTransformDataValidLogFour() throws IOException {
-        HashMap<String, HashMap<String, String>> logData;
+        LinkedHashMap<Integer, LinkedHashMap<String, String>> logData;
         String path = classLoader.getResource("log_test_four.log").getFile();
         File initialFile = new File(path);
         InputStream targetStream = new FileInputStream(initialFile);
@@ -131,7 +132,7 @@ public class LogContentTransformerTests {
 
     @Test
     public void testTransformDataValidLoWithWeirdDates() throws IOException {
-        HashMap<String, HashMap<String, String>> logData;
+        LinkedHashMap<Integer, LinkedHashMap<String, String>> logData;
         String path = classLoader.getResource("logsWithDifferentDateTypes.log").getFile();
         File initialFile = new File(path);
         InputStream targetStream = new FileInputStream(initialFile);

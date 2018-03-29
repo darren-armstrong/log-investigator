@@ -10,13 +10,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.text.DateFormatSymbols;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 public class LogContentTransformer {
     private InputStream fileContent;
     private DateFormatSymbols dateFormatSymbols = DateFormatSymbols.getInstance();
-    private HashMap<String, HashMap<String, String>> logData = new HashMap<>();
+    private LinkedHashMap<Integer, LinkedHashMap<String, String>> logData = new LinkedHashMap<>();
     private BufferedReader bufferedReader;
     private String storeLine = "";
 
@@ -24,7 +24,7 @@ public class LogContentTransformer {
         this.fileContent = fileContent;
     }
 
-    public HashMap<String, HashMap<String, String>> generateLogOutput() throws IOException {
+    public LinkedHashMap<Integer, LinkedHashMap<String, String>> generateLogOutput() throws IOException {
         getLogDataFromFile();
         setOutputForLogData();
 
@@ -48,7 +48,7 @@ public class LogContentTransformer {
                 }
                 if(!storeLine.isEmpty()){
                     count++;
-                    logData.put("line " + count, getDataFromLine(storeLine));
+                    logData.put(count, getDataFromLine(storeLine));
                 }
             }else{
                 logLongerThanOneLine.append(storeLine).append("\n");
@@ -62,7 +62,7 @@ public class LogContentTransformer {
         }
         if(!storeLine.isEmpty()){
             count++;
-            logData.put("line " + count, getDataFromLine(storeLine));
+            logData.put(count, getDataFromLine(storeLine));
         }
     }
 
@@ -106,10 +106,10 @@ public class LogContentTransformer {
         return false;
     }
 
-    HashMap<String, String> getDataFromLine(String line){
+    LinkedHashMap<String, String> getDataFromLine(String line){
         LogLevels logLevels = new LogLevels();
         String [] splitLine;
-        HashMap<String, String> data = new HashMap<>();
+        LinkedHashMap<String, String> data = new LinkedHashMap<>();
 
         for (String level: logLevels.getLogLevels()) {
             if(line.contains(level)){
@@ -145,7 +145,7 @@ public class LogContentTransformer {
         return replaceAnyDoubleQuotesInString(line);
     }
 
-    public String replaceAnyDoubleQuotesInString(String line){
+    private String replaceAnyDoubleQuotesInString(String line){
         line = line.replace("\"", "\\\"");
         line = line.replace("\\\\\"", "\\\"");
 
